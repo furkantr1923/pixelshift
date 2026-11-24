@@ -1,144 +1,39 @@
-PIXELSHIFT — "BUNU NASIL YAPTIN?" SORUSUNA CEVAP
-================================================
-Hazırlayan: Furkan
-Amaç: Projeyi gösterdiğimde gelebilecek sorulara kısa, dürüst ve teknik cevaplar.
+PIXELSHIFT — NASIL YAPTIM? (KISA ÖZET)
+=====================================
 
+NE?
+Windows + Android'de çalışan, Türkçe, koyu temalı fotoğraf düzenleyici.
+Hesap yok, temel düzenleme internetsiz. AI ya cihazda ya da izinle çevrimiçi.
 
-1) PROJE NE?
-------------
-PIXELSHIFT; Windows 10/11 ve Android'de çalışan, Türkçe, koyu temalı bir fotoğraf
-düzenleyici. Hesap yok, temel düzenleme internetsiz çalışır. AI özellikleri ya cihazda
-(klasik algoritmalar) ya da kullanıcı her seferinde izin verirse çevrimiçi sağlayıcıyla
-(Hugging Face / remove.bg) çalışır.
+TEKNOLOJİ
+- Flutter + Dart: tek kod tabanı, iki platform (her birine ayrı arayüz düzeni)
+- image paketi (saf Dart): JPG/PNG/WEBP/BMP/TIFF/GIF/PSD okuma-yazma
+- SQLite: proje listesi ve ayarlar; projeler uygulamanın kendi klasöründe (JSON + görseller)
+- GitHub Actions: her güncellemede otomatik test + Setup.exe + taşınabilir ZIP + APK
 
+ÖNEMLİ KARARLAR
+1) Tahribatsız düzenleme: orijinal fotoğraf hiç değişmez, sadece ayarlar saklanır.
+   Geri al/yinele = ayar kopyalarından oluşan bir yığın.
+2) Ekran = dosya: renk ayarları tek bir renk matrisine çevrilir; ekranda GPU'da,
+   kaydederken aynı sayılarla uygulanır. Katmanlar iki yerde de aynı kodla çizilir.
+3) Donmayan arayüz: ağır işler arka plan iş parçacıklarında (isolate).
+   Ekranda küçük kopya, kaydederken tam çözünürlük. 24 MP görsel ~3,5 sn'de açılır.
+4) Kendi WebP kodlayıcım: önce Python'da yazıp doğruladım, sonra Dart'a taşıdım.
+5) Gizlilik: çevrimiçi AI'dan önce her seferinde izin penceresi. "Gönderme" denirse
+   tek istek bile gitmez (testle kanıtlı). API anahtarı kodda yok.
 
-2) HANGİ TEKNOLOJİLERİ KULLANDIN, NEDEN?
----------------------------------------
-- Flutter + Dart: Tek kod tabanından Windows .exe ve Android .apk. Arayüz her platforma
-  ayrı tasarlandı (Windows: menü + paneller, Android: alt araç şeridi).
-- "image" paketi (saf Dart): JPG/PNG/WEBP/BMP/TIFF/GIF/PSD çözme ve kodlama. Yerel (C++)
-  kütüphane gerektirmediği için iki platformda da aynı sonucu verir.
-- SQLite (sqflite / Windows'ta FFI): proje dizini ve ayarlar.
-- Proje dosyaları: uygulamanın kendi klasöründe JSON + görsel dosyaları.
-- http paketi: çevrimiçi AI sağlayıcıları.
-- file_selector, image_picker, gal, share_plus: dosya açma/kaydetme, galeri, paylaşım.
-- GitHub Actions: Her push'ta otomatik test + Windows Setup.exe + taşınabilir ZIP + APK.
+AI DÜRÜSTLÜĞÜ
+- "Yerel" araçlar (nesne silme, düz arka plan kaldırma, iyileştirme, stiller,
+  Türkçe komut) klasik görüntü işleme algoritmalarıdır, yapay zekâ değildir.
+- Gerçek AI: Hugging Face ve remove.bg, kullanıcının kendi ücretsiz anahtarıyla.
 
-Neden Rust/C++ yerel motor yok? Prompt "gerekirse native" diyordu. Ölçtüğümde Dart AOT
-derlemesi, arka plan isolate'lerinde 24 MP fotoğrafları birkaç saniyede işleyebiliyor.
-Yerel kütüphane eklemek iki platformda derleme riskini ve bakım yükünü artıracaktı;
-kazanç bu sürüm için gerekli değildi. Mimari, ileride performans gereken tek bir
-fonksiyonun native'e taşınmasına izin verecek şekilde ayrık (image_engine modülü).
+TEST
+- 64 birim/arayüz testi, derlenmiş EXE'de 33 kontrollü kendi kendini sınama
+- Uçtan uca test Windows'ta ve Android 14 emülatöründe geçti
+- Arayüz testi gerçek bir taşma hatasını yakaladı, düzelttim
 
-
-3) EN ZOR KISIMLAR VE NASIL ÇÖZDÜM
----------------------------------
-a) Ekranda gördüğüm = kaydettiğim dosya olmalı
-   - Renk ayarlarının hepsini (pozlama, kontrast, sıcaklık, doygunluk, filtre...) tek bir
-     5x4 renk matrisine çevirdim. Ekranda GPU'da (ColorFilter.matrix) anında, dışa
-     aktarmada aynı katsayılarla Dart'ta uygulanıyor.
-   - Katmanlar (metin, şekil, görsel, maske) hem ekranda hem dışa aktarmada AYNI kodla
-     (LayerPainter) çiziliyor. Dışa aktarmada GPU'ya 2048 px'lik karolar hâlinde
-     çizdirip tam çözünürlüklü görüntüye birleştiriyorum; böylece 6000x4000 gibi büyük
-     görsellerde GPU doku sınırına takılmıyor.
-
-b) Uygulama donmamalı, RAM şişmemeli
-   - Ağır işlemler (çözme, döndürme, keskinleştirme, kodlama, AI) arka plan
-     isolate'lerinde çalışıyor; arayüz iş parçacığı hiç beklemiyor.
-   - Önizleme çözünürlüğü (ör. 2048 px) ile çıktı çözünürlüğü ayrı. Büyük JPEG'leri
-     önizleme için DCT ölçekli (1/2, 1/4, 1/8) çözüyorum; tam çözünürlük yalnızca
-     dışa aktarma/AI sırasında belleğe alınıyor.
-
-c) Tahribatsız düzenleme + çok adımlı geri al
-   - Orijinal dosya asla değişmiyor. Belge (EditDocument) sadece parametreleri tutuyor
-     ve değişmez (immutable). Her değişiklik yeni bir belge; geri al/yinele bu
-     belgelerden oluşan bir yığın. AI sonuçları yeni bir "kaynak sürümü" olarak
-     saklandığı için onlar da geri alınabiliyor.
-
-d) WebP kaydetme
-   - Kullandığım kütüphanenin WebP kayıpsız kodlaması yerine kendi saf Dart VP8L
-     kodlayıcımı yazdım: yeşil çıkarma + blok başına tahmin dönüşümü + LZ77 + uzunluk
-     sınırlı kanonik Huffman. Önce Python'da prototipleyip resmî çözücüyle piksel
-     piksel doğruladım, sonra Dart'a taşıdım. Kalite <100 seçilince kütüphanenin
-     kayıplı (VP8) kodlayıcısı kullanılıyor.
-
-e) Gizlilik kuralı
-   - Tüm AI istekleri tek bir kapıdan (AiService) geçiyor. Sağlayıcı çevrimiçiyse önce
-     izin penceresi açılıyor: sağlayıcı, adres, model ve lisansı, ne gönderileceği,
-     saklama bilgisi, ücret/sınır. "Gönderme" denirse hiçbir ağ isteği yapılmıyor —
-     bunu birim testiyle kanıtlıyorum (sahte sunucuya gelen istek sayısı 0).
-   - API anahtarları kaynak kodda yok; kullanıcı Ayarlar'dan giriyor. Bir test, kaynak
-     kodunu gömülü anahtar için tarıyor.
-
-
-4) "AI" DEDİĞİN GERÇEKTEN AI MI?
---------------------------------
-Dürüst cevap: İki tür var ve arayüzde açıkça ayrılıyor.
-- "Yerel (AI değil)": klasik görüntü işleme algoritmaları — çok ölçekli difüzyonla
-  nesne silme, kenardan taşma ile düz arka plan kaldırma, Kuwahara filtresiyle yağlı
-  boya, ten rengi maskesiyle cilt yumuşatma, histogramla otomatik iyileştirme, Türkçe
-  kural tabanlı komut yorumlayıcı. İnternetsiz ve ücretsiz.
-- Çevrimiçi AI: Hugging Face (ör. RMBG-1.4, Swin2SR, instruct-pix2pix) ve remove.bg.
-  Kullanıcının kendi ücretsiz anahtarıyla, her seferinde izinle. Ücretsiz kotalar
-  sağlayıcıya bağlı; kredi bitince uygulama "ücret oluşturulmadı" diye bildiriyor.
-Neden ağır AI modellerini cihaza gömmedim? Prompt "zorlama" diyordu; ayrıca yüzlerce
-MB model hem APK'yı şişirir hem de orta seviye telefonlarda yavaş çalışır.
-
-
-5) NASIL TEST ETTİN?
---------------------
-- Birim testleri: kodlayıcılar (WebP birebir doğrulama), geometri, renk, proje kaydı
-  (gerçek SQLite), AI adaptörleri (sahte sunucu: 401/402/404/429/503, internet yok,
-  iptal), izin kapısı, komut yorumlayıcı, klasik algoritmalar, toplu işlem.
-- Arayüz testleri: masaüstü (1440x900) ve telefon (390x844) boyutlarında ana ekran ve
-  düzenleyici; taşma (overflow) hatası; İngilizce metin taraması.
-- Uçtan uca test: Windows'ta ve Android 14 emülatöründe içe aktar → düzenle → katman →
-  yerel AI → kaydet → yeniden aç → dışa aktar.
-- Kendi kendini sınama: derlenmiş pixelshift.exe "--self-test" parametresiyle gerçek
-  ikili dosya üzerinde kodlayıcıları, 24 MP görseli, proje sistemini, GPU katman
-  birleştirmesini ve gizlilik kuralını test edip rapor yazıyor.
-- README ve sunumdaki ekran görüntüleri de CI'da gerçek uygulamadan
-  ("--screenshots") otomatik alınıyor.
-
-
-6) DESTEKLENMEYENLER (SORULURSA SAKLAMA)
---------------------------------------
-- PSD: katmanlar ayrı açılmıyor, birleştirilmiş görüntü düzenleniyor.
-- RAW: ham sensör verisi değil, kameranın gömülü JPEG önizlemesi kullanılıyor.
-- GIF: animasyon korunmuyor (ilk kare). HEIC/AVIF desteklenmiyor (anlaşılır hata).
-- Yerel arka plan kaldırma sadece düz arka planlarda iyi; karmaşık sahne için
-  çevrimiçi sağlayıcı gerekiyor.
-- Çevrimiçi sağlayıcılar geliştirme sırasında gerçek servisle değil sahte sunucuyla
-  test edildi (geliştirme ortamında ağ kısıtlıydı).
-- Windows kurulum dosyası kod imzalı değil (SmartScreen uyarısı çıkabilir).
-- APK, kalıcı anahtar tanımlanana kadar geçici anahtarla imzalanıyor (KURULUM.md).
-
-
-7) PROJE YAPISI (KISA)
----------------------
-lib/
-  app/               tema, kök widget, ortak bileşenler, kapanış koruması
-  editor/            belge, geçmiş, denetleyici, tuval, paneller
-  image_engine/      Raster, codec, geometri, detay, renk matrisi, WebP, klasik algoritmalar
-  layers/            katman modelleri + çizici
-  filters/           ayarlar + hazır filtreler
-  ai/                sağlayıcılar, izin kapısı, komut yorumlayıcı
-  templates/ collage/ batch_processing/ export/ projects/ platform_services/ settings/
-test/                birim + arayüz testleri
-integration_test/    uçtan uca test
-tool/setup.dart      Android/Windows platform klasörlerini üretip ayarları uygular
-installer/           Inno Setup betiği (Setup.exe)
-.github/workflows/   CI: test, Windows, Android, emülatör, yayın
-
-
-8) GELİŞTİRME SÜRECİ
--------------------
-1. Promptu aşamalara böldüm; önce Aşama 1 (temel sürüm) çalışır hâle geldi.
-2. Görüntü motorunu arayüzden bağımsız, saf Dart ve test edilebilir yazdım.
-3. Arayüzü Windows ve Android için ayrı düzenlerle kurdum.
-4. Katman, maske, şablon, kolaj, toplu işlem ve AI modüllerini ekledim.
-5. Her push'ta GitHub Actions ile test edip Windows ve Android paketlerini ürettim;
-   derleme/test hatalarını burada düzelttim.
-6. Dokümantasyon, sunum ve bu açıklamayı hazırladım.
+SINIRLAMALAR
+PSD katmanları ayrı açılmaz; RAW'da gömülü önizleme kullanılır; GIF animasyonu
+korunmaz; HEIC yok; çevrimiçi AI sahte sunucuyla test edildi; EXE/APK kalıcı imzasız.
 
 PIXELSHIFT — Furkan tarafından geliştirildi.
