@@ -347,8 +347,7 @@ jobs:
       - name: Özet
         run: |
           mkdir -p out/raporlar out/ekran-goruntuleri
-          cp art/PIXELSHIFT-Windows/*.exe art/PIXELSHIFT-Windows/*.zip out/ 2>/dev/null || true
-          cp art/PIXELSHIFT-Android/*.apk out/ 2>/dev/null || true
+          find art/PIXELSHIFT-Windows art/PIXELSHIFT-Android \( -name '*.exe' -o -name '*.zip' -o -name '*.apk' \) -exec cp {} out/ \; 2>/dev/null || true
           cp art/ekran-goruntuleri/* out/ekran-goruntuleri/ 2>/dev/null || true
           for d in test-sonuclari windows-test-sonuclari android-test-sonuclari PIXELSHIFT-Android PIXELSHIFT-Windows; do
             [ -d "art/$d" ] && find "art/$d" -name '*.txt' -exec cp {} out/raporlar/ \; ; done
