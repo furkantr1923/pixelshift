@@ -92,6 +92,10 @@ class EditorController extends ChangeNotifier {
   // Katman görselleri (önizleme boyutu)
   final LayerImages layerImages = {};
   final Set<String> _loadingAssets = {};
+  final Map<String, Future<void>> _assetLoads = {};
+
+  /// Yüklenmekte olan katman görsellerinin tamamlanması (küçük resim/kayıt için).
+  Future<void> get assetsReady => Future.wait(_assetLoads.values.toList());
 
   // Araç durumu
   EditorTool _tool = EditorTool.select;
@@ -286,7 +290,9 @@ class EditorController extends ChangeNotifier {
   void _ensureLayerImages() {
     for (final l in _doc.layers) {
       if (l is ImageLayer && !layerImages.containsKey(l.assetFile) && !_loadingAssets.contains(l.assetFile)) {
-        unawaited(_loadAsset(l.assetFile));
+        final f = _loadAsset(l.assetFile);
+        _assetLoads[l.assetFile] = f;
+        unawaited(f.whenComplete(() => _assetLoads.remove(l.assetFile)));
       }
     }
   }
@@ -781,6 +787,7 @@ class EditorController extends ChangeNotifier {
 
   /// Önizleme bileşimini (renk + katmanlar) küçük PNG olarak üretir.
   Future<Uint8List> renderThumbnailPng(int maxSide) async {
+    await assetsReady.timeout(const Duration(seconds: 20), onTimeout: () {});
     final base = baseImage;
     final w = _doc.canvasWidth.toDouble(), h = _doc.canvasHeight.toDouble();
     final scale = maxSide / math.max(w, h);
