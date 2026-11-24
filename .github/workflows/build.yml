@@ -1,0 +1,330 @@
+name: PIXELSHIFT CI
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      yayinla:
+        description: 'Paketleri GitHub Releases sayfasında yayınla'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Kod bu Flutter sürümüyle hedeflenmiştir; bağımlılıklar buna uyumlu çözülür.
+  FLUTTER_VERSION: '3.27.4'
+
+jobs:
+  # ---------------------------------------------------------------- Testler
+  test:
+    name: Analiz ve testler
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: SQLite kütüphanesi (FFI veritabanı testleri için)
+        run: sudo apt-get update -y && sudo apt-get install -y libsqlite3-dev
+
+      - name: Bağımlılık çözümü (kilit dosyası)
+        run: flutter pub get && cat pubspec.lock | grep -A2 -E '^  (image|file_selector|gal|share_plus|flutter_svg|http|sqflite):' || true
+
+      - name: Bağımlılıklar
+        run: flutter pub get
+
+      - name: Statik analiz
+        shell: bash
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings 2>&1 | tee analyze-output.txt
+
+      - name: Birim, veritabanı ve arayüz testleri
+        shell: bash
+        run: flutter test --reporter expanded 2>&1 | tee test-output.txt
+
+      - name: Test çıktılarını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-sonuclari
+          path: |
+            test-output.txt
+            analyze-output.txt
+
+  # ---------------------------------------------------------------- Windows
+  windows:
+    name: Windows (Setup.exe + taşınabilir)
+    # Flutter 3.27 Visual Studio 2022 ile derler; windows-latest artık VS 2026 içeriyor.
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıklar
+        run: flutter pub get
+
+      - name: Platform kurulumu (tool/setup.dart)
+        run: dart run tool/setup.dart
+
+      - name: Release derleme
+        run: flutter build windows --release
+
+      - name: Sürüm numarası
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9.]+)').Matches[0].Groups[1].Value
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Paket içeriğini doğrula + VC++ çalışma zamanını ekle
+        shell: pwsh
+        run: |
+          $rel = "build\windows\x64\runner\Release"
+          foreach ($f in @("pixelshift.exe", "sqlite3.dll", "flutter_windows.dll", "data\app.so", "data\icudtl.dat", "data\flutter_assets\fonts\MaterialIcons-Regular.otf")) {
+            if (-not (Test-Path "$rel\$f")) { throw "Eksik dosya: $f" }
+          }
+          # Temiz Windows kurulumlarında Visual C++ yeniden dağıtılabilir paketi gerekmesin diye
+          foreach ($dll in @("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll")) {
+            Copy-Item "$env:WINDIR\System32\$dll" $rel -Force
+          }
+          Get-ChildItem $rel | Select-Object Name, Length | Format-Table -AutoSize
+
+      - name: Gerçek çalıştırma testi (release exe + paketli sqlite3.dll)
+        shell: pwsh
+        run: |
+          $rel = (Resolve-Path "build\windows\x64\runner\Release").Path
+          $out = Join-Path $env:RUNNER_TEMP "pixelshift-selftest.txt"
+          $p = Start-Process -FilePath "$rel\pixelshift.exe" -ArgumentList "--self-test=$out" -WorkingDirectory $rel -PassThru
+          $null = $p.Handle
+          if (-not $p.WaitForExit(180000)) { $p.Kill(); throw "Self-test zaman aşımına uğradı" }
+          if (-not (Test-Path $out)) { throw "Self-test raporu oluşmadı (çıkış kodu: $($p.ExitCode))" }
+          Get-Content $out -Encoding UTF8
+          Copy-Item $out windows-selftest.txt
+          if (-not (Select-String -Path $out -Pattern 'RESULT: PASS' -Quiet)) { throw "Self-test başarısız" }
+
+      - name: Ekran görüntüleri (gerçek arayüz, README/sunum için)
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $rel = (Resolve-Path "build\windows\x64\runner\Release").Path
+          $out = Join-Path $env:GITHUB_WORKSPACE "ekran-goruntuleri"
+          $p = Start-Process -FilePath "$rel\pixelshift.exe" -ArgumentList "--screenshots=$out" -WorkingDirectory $rel -PassThru
+          $null = $p.Handle
+          if (-not $p.WaitForExit(300000)) { $p.Kill(); throw "Ekran görüntüsü modu zaman aşımına uğradı" }
+          Get-ChildItem $out | Select-Object Name, Length | Format-Table -AutoSize
+          Get-Content (Join-Path $out "ekran_goruntusu_gunlugu.txt") -Encoding UTF8
+
+      - name: Ekran görüntülerini sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ekran-goruntuleri
+          path: ekran-goruntuleri/
+          if-no-files-found: ignore
+
+      - name: Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Setup.exe oluştur
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=${{ steps.ver.outputs.version }}" installer\pixelshift.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC başarısız" }
+
+      - name: Taşınabilir ZIP oluştur
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $dir = "dist\PIXELSHIFT-Portable-$v"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          Copy-Item "build\windows\x64\runner\Release\*" $dir -Recurse -Force
+          Set-Content -Path "$dir\portable.txt" -Encoding UTF8 -Value "Bu dosya bulundugu surece PIXELSHIFT verilerini bu klasordeki PIXELSHIFT-Veri dizininde saklar. Silerseniz veriler Windows kullanici klasorunde tutulur."
+          Compress-Archive -Path $dir -DestinationPath "dist\PIXELSHIFT-Portable-$v-win-x64.zip" -Force
+          Remove-Item $dir -Recurse -Force
+          Get-ChildItem dist
+
+      - name: Windows paketlerini sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: PIXELSHIFT-Windows
+          path: |
+            dist/*.exe
+            dist/*.zip
+            windows-selftest.txt
+
+      - name: Uçtan uca arayüz testi (Windows)
+        shell: bash
+        run: flutter test integration_test/app_test.dart -d windows --reporter expanded 2>&1 | tee windows-integration.txt
+
+      - name: Windows test çıktısını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-test-sonuclari
+          path: |
+            windows-selftest.txt
+            windows-integration.txt
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- Android
+  android:
+    name: Android (APK)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıklar
+        run: flutter pub get
+
+      - name: Platform kurulumu (tool/setup.dart)
+        run: dart run tool/setup.dart
+
+      - name: Release APK
+        run: flutter build apk --release
+
+      - name: İmzala ve doğrula
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed -E 's/version: *([0-9.]+).*/\1/')
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          SRC=build/app/outputs/flutter-apk/app-release.apk
+          mkdir -p dist
+          if [ -n "$KEYSTORE_B64" ]; then
+            export KEY_PASS="${KEY_PASS:-$KS_PASS}"
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            OUT="dist/PIXELSHIFT-$VERSION.apk"
+            "$BT/apksigner" sign --ks "$RUNNER_TEMP/release.jks" --ks-pass env:KS_PASS \
+              --ks-key-alias "$KEY_ALIAS" --key-pass env:KEY_PASS --out "$OUT" "$SRC"
+            rm -f "$RUNNER_TEMP/release.jks"
+          else
+            echo "::warning::ANDROID_KEYSTORE_BASE64 tanımlı değil. APK geçici bir anahtarla imzalandı; güncellemelerde kaldır-yükle gerekir. Kalıcı imza için docs/KURULUM.md."
+            OUT="dist/PIXELSHIFT-$VERSION-gecici-imza.apk"
+            cp "$SRC" "$OUT"
+          fi
+          "$BT/apksigner" verify --verbose --print-certs "$OUT" | tee apk-verify.txt
+          "$BT/aapt2" dump badging "$OUT" > badging.txt || true
+          head -n 4 badging.txt | tee -a apk-verify.txt
+          ls -la dist
+
+      - name: APK'yı sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: PIXELSHIFT-Android
+          path: |
+            dist/*.apk
+            apk-verify.txt
+
+  android-integration:
+    name: Android emülatör testi
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıklar ve platform kurulumu
+        run: |
+          flutter pub get
+          dart run tool/setup.dart --no-icons
+
+      - name: KVM erişimi
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Uçtan uca arayüz testi (Android 14 emülatör)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: flutter test integration_test/app_test.dart -d emulator-5554 --reporter expanded > android-integration.txt 2>&1; status=$?; cat android-integration.txt; exit $status
+
+      - name: Android test çıktısını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-sonuclari
+          path: android-integration.txt
+          if-no-files-found: ignore
+
+  # ---------------------------------------------------------------- Yayın
+  release:
+    name: GitHub Release
+    # v* etiketi gönderildiğinde veya Actions sekmesinden "yayinla" seçilerek elle çalıştırıldığında
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.yayinla)
+    needs: [test, windows, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sürüm numarası
+        id: ver
+        run: |
+          echo "version=$(grep '^version:' pubspec.yaml | sed -E 's/version: *([0-9.]+).*/\1/')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.ver.outputs.version) }}
+          target_commitish: ${{ github.sha }}
+          name: PIXELSHIFT ${{ steps.ver.outputs.version }}
+          generate_release_notes: true
+          files: |
+            artifacts/PIXELSHIFT-Windows/**/*.exe
+            artifacts/PIXELSHIFT-Windows/**/*.zip
+            artifacts/PIXELSHIFT-Android/**/*.apk
+            artifacts/test-sonuclari/*.txt
+            artifacts/PIXELSHIFT-Android/apk-verify.txt
+            artifacts/PIXELSHIFT-Windows/windows-selftest.txt

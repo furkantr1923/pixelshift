@@ -1,0 +1,29 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+*.log
+
+# Teslim çıktıları (CI tarafından üretilir)
+dist/
+
+# Android imzalama anahtarları ASLA depoya eklenmez
+*.jks
+*.keystore
+key.properties
+android/local.properties
+
+# Windows
+windows/flutter/ephemeral/
+*.user
+
+# Test çıktıları
+coverage/
+test-output*.txt

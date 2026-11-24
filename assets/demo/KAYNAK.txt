@@ -1,0 +1,5 @@
+Örnek fotoğraflar (scikit-image örnek veri kümesinden):
+
+kahve.jpg  — Coffee cup, Rachel Michetti (Pikolo Espresso Bar). CC0 / telif kısıtlaması yok.
+kedi.jpg   — Chelsea the cat, Stefan van der Walt. CC0 / telif kısıtlaması yok.
+roket.jpg  — DSCOVR fırlatma fotoğrafı, SpaceX. Kamu malı (public domain).

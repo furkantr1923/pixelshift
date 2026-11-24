@@ -1,0 +1,116 @@
+name: pixelshift
+description: "PIXELSHIFT — Türkçe, koyu temalı, çevrimdışı çalışan profesyonel fotoğraf düzenleyici (Windows + Android)."
+publish_to: 'none'
+
+# Sürüm numarası lib/core/app_info.dart içindeki AppInfo.version ile aynı tutulur.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Saf Dart görüntü kod çözme/kodlama (JPG, PNG, WEBP, BMP, TIFF, GIF, PSD)
+  image: ^4.13.1
+
+  # Proje dizini ve ayarlar: Android'de sqflite, Windows'ta FFI + gömülü sqlite3.dll
+  sqflite: ^2.4.1
+  sqflite_common_ffi: ^2.3.4
+  sqlite3_flutter_libs: ^0.5.28
+
+  # Dosya yolları
+  path: ^1.9.0
+  path_provider: ^2.1.5
+
+  # Dosya açma/kaydetme (Windows + Android), Android galeri seçici
+  file_selector: ^1.0.3
+  image_picker: ^1.1.2
+
+  # Android: galeriye kaydetme ve paylaşma
+  gal: ^2.3.0
+  share_plus: ^10.1.4
+
+  # SVG içe aktarma (piksel görüntüye dönüştürme)
+  flutter_svg: ^2.0.10
+
+  # Çevrimiçi AI sağlayıcıları (yalnızca kullanıcı izniyle)
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.2
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/app_icon.png
+    - assets/demo/
+    - assets/fonts/LICENSE-Inter.txt
+    - assets/fonts/OFL-Poppins.txt
+    - assets/fonts/OFL-FiraSans.txt
+    - assets/fonts/OFL-Anton.txt
+    - assets/fonts/OFL-ArchivoBlack.txt
+    - assets/fonts/OFL-CrimsonText.txt
+    - assets/fonts/OFL-ComicRelief.txt
+    - assets/fonts/OFL-AnonymousPro.txt
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.otf
+        - asset: assets/fonts/Inter-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.otf
+          weight: 700
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+    - family: Fira Sans
+      fonts:
+        - asset: assets/fonts/FiraSans-Regular.ttf
+        - asset: assets/fonts/FiraSans-Bold.ttf
+          weight: 700
+    - family: Anton
+      fonts:
+        - asset: assets/fonts/Anton-Regular.ttf
+    - family: Archivo Black
+      fonts:
+        - asset: assets/fonts/ArchivoBlack-Regular.ttf
+    - family: Crimson Text
+      fonts:
+        - asset: assets/fonts/CrimsonText-Regular.ttf
+        - asset: assets/fonts/CrimsonText-Bold.ttf
+          weight: 700
+    - family: Comic Relief
+      fonts:
+        - asset: assets/fonts/ComicRelief-Regular.ttf
+        - asset: assets/fonts/ComicRelief-Bold.ttf
+          weight: 700
+    - family: Anonymous Pro
+      fonts:
+        - asset: assets/fonts/AnonymousPro-Regular.ttf
+        - asset: assets/fonts/AnonymousPro-Bold.ttf
+          weight: 700
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#0B0E16"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  min_sdk_android: 21
+  windows:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    icon_size: 256
