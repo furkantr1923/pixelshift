@@ -1,0 +1,8 @@
+OK 01_ana_ekran (1440x900)
+OK 02_duzenleyici_katmanlar (1440x900)
+OK 03_ayarlar (1440x900)
+OK 04_filtreler (1440x900)
+OK 05_ai_araclari (1440x900)
+OK 06_kirpma (1440x900)
+OK 07_telefon_ana_ekran (390x844)
+OK 08_telefon_duzenleyici (390x844)

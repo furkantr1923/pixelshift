@@ -1,0 +1,38 @@
+PIXELSHIFT kendi kendini sınama raporu
+Platform: windows "Windows Server 2022 Datacenter" 10.0 (Build 20348)
+
+[GECTI] JPG kodla/çöz (82726 bayt, ort. fark 1.18)
+[GECTI] PNG kodla/çöz (3133 bayt, ort. fark 0.00)
+[GECTI] WEBP kodla/çöz (6608 bayt, ort. fark 0.00)
+[GECTI] BMP kodla/çöz (921738 bayt, ort. fark 0.00)
+[GECTI] TIFF kodla/çöz (1228970 bayt, ort. fark 0.00)
+[GECTI] WEBP kayıplı (VP8) (14338 bayt)
+[GECTI] PIXELSHIFT VP8L kodlayıcısı birebir (6608 bayt)
+[GECTI] Şeffaf PNG korunur
+[GECTI] JPG şeffaflığı beyaza birleştirir
+[GECTI] Bozuk PNG anlaşılır hata verir
+[GECTI] Desteklenmeyen format reddedilir
+[GECTI] Boş dosya reddedilir
+[GECTI] 90° döndürme boyutları
+[GECTI] Kırpma
+[GECTI] Düzleştirme
+[GECTI] Doygunluk -100 gri üretir
+[GECTI] Boyutlandırma (küçült/büyüt)
+[GECTI] 24 MP JPEG ölçekli önizleme (önizleme 2048x1365, 3539 ms)
+[GECTI] Nesne silme (inpainting)
+[GECTI] Düz arka plan kaldırma
+[GECTI] Çözünürlük yükseltme 2×
+[GECTI] Otomatik iyileştirme
+[GECTI] Kaydet ve yeniden aç
+[GECTI] Türkçe metin katmanı korunur
+[GECTI] Ayarlar korunur
+[GECTI] Yeniden adlandırma
+[GECTI] Son projeler listesi
+[GECTI] Proje silme
+[GECTI] Çok adımlı geçmiş ve sınır
+[GECTI] Şekil katmanı dışa aktarmaya işlenir
+[GECTI] İzin verilmezse görsel gönderilmez
+[GECTI] Bağlantı yokken anlaşılır hata (Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.)
+[GECTI] "daha parlak ve siyah beyaz yap"
+
+RESULT: PASS

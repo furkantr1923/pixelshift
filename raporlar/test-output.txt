@@ -1,0 +1,68 @@
+00:00 +0: loading /home/runner/work/pixelshift/pixelshift/test/classic_test.dart
+00:00 +0: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: nesne silme: maskeli alan çevreden doldurulur
+00:00 +1: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: nesne silme: boş maske ve çok büyük alan reddedilir
+00:00 +2: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: düz arka plan kaldırma ve arka plan değiştirme
+00:00 +3: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: karmaşık arka planda yerel yöntem dürüstçe reddeder
+00:00 +4: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: şeffaflık yokken arka plan değiştirme açıklama ister
+00:00 +5: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: büyütme, iyileştirme, portre, restorasyon ve stiller çalışır
+00:00 +6: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: otomatik ayar karanlık görüntüyü aydınlatır
+00:00 +7: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: toplu işlem: boyutlandırma + format + ad
+00:00 +8: /home/runner/work/pixelshift/pixelshift/test/classic_test.dart: toplu işlem: bozuk dosya hatası diğerlerini etkilemez
+00:04 +9: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: (setUpAll)
+00:04 +9: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:05 +10: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:05 +11: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:05 +12: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:05 +13: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:05 +14: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:05 +15: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (masaüstü)
+00:06 +16: /home/runner/work/pixelshift/pixelshift/test/ai_test.dart: Hugging Face adaptörü model yükleniyor (503) yanıtında bekleyip yeniden dener
+00:08 +17: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:08 +18: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:08 +19: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:08 +20: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:08 +21: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:08 +22: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:08 +23: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +24: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +25: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +26: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +27: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +28: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +29: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +30: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +31: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:09 +32: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +33: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +34: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +35: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +36: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +37: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +38: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +39: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (masaüstü)
+00:10 +40: /home/runner/work/pixelshift/pixelshift/test/image_engine_test.dart: Kodlama / çözme WEBP gidiş-dönüş
+00:10 +41: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (telefon)
+00:10 +42: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (telefon)
+00:10 +43: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: ana ekran Türkçe ve taşmasız (telefon)
+00:11 +44: /home/runner/work/pixelshift/pixelshift/test/image_engine_test.dart: Kodlama / çözme kayıplı WEBP kalite ile boyut değişir
+00:11 +45: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:11 +46: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:11 +47: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +48: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +49: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +50: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +51: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +52: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +53: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +54: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +55: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +56: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +57: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +58: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:12 +59: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: düzenleyici açılır, araçlar ve geri al çalışır (telefon)
+00:15 +60: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: Hakkında ekranında imza görünür
+00:15 +61: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: Ayarlar ve şablonlar açılır
+00:15 +62: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: kaynak kodunda gömülü API anahtarı yok
+00:15 +63: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: arayüz metinlerinde İngilizce düğme/başlık kalmadı
+00:15 +64: /home/runner/work/pixelshift/pixelshift/test/widget_test.dart: (tearDownAll)
+00:15 +64: All tests passed!
