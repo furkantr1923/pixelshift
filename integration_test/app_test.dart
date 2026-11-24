@@ -124,6 +124,11 @@ void main() {
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();
-    await Directory(root).delete(recursive: true);
+    await services.database.close();
+    try {
+      await Directory(root).delete(recursive: true);
+    } on FileSystemException {
+      // Windows bazen dosya kilidini geç bırakır; geçici klasör sistemce temizlenir.
+    }
   });
 }
