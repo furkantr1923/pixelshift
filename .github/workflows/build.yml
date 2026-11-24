@@ -328,3 +328,44 @@ jobs:
             artifacts/test-sonuclari/*.txt
             artifacts/PIXELSHIFT-Android/apk-verify.txt
             artifacts/PIXELSHIFT-Windows/windows-selftest.txt
+
+  # ---------------------------------------------------------------- Teslim dalı
+  # Derlenen paketler, test raporları ve ekran görüntüleri 'builds' dalına konur
+  # (yalnızca son derleme tutulur; geçmiş zorla üzerine yazılır).
+  publish:
+    name: Sonuçları 'builds' dalına koy
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test, windows, android, android-integration]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: art
+      - name: Özet
+        run: |
+          mkdir -p out/raporlar out/ekran-goruntuleri
+          cp art/PIXELSHIFT-Windows/*.exe art/PIXELSHIFT-Windows/*.zip out/ 2>/dev/null || true
+          cp art/PIXELSHIFT-Android/*.apk out/ 2>/dev/null || true
+          cp art/ekran-goruntuleri/* out/ekran-goruntuleri/ 2>/dev/null || true
+          for d in test-sonuclari windows-test-sonuclari android-test-sonuclari PIXELSHIFT-Android PIXELSHIFT-Windows; do
+            [ -d "art/$d" ] && find "art/$d" -name '*.txt' -exec cp {} out/raporlar/ \; ; done
+          {
+            echo "# Derleme özeti"
+            echo "Commit: ${GITHUB_SHA}"
+            echo "Zaman: $(date -u +%FT%TZ)"
+            echo "test: ${{ needs.test.result }}"
+            echo "windows: ${{ needs.windows.result }}"
+            echo "android: ${{ needs.android.result }}"
+            echo "android-integration: ${{ needs.android-integration.result }}"
+          } > out/DURUM.md
+          ls -laR out | head -60
+      - name: builds dalına gönder
+        run: |
+          cd out
+          git init -q -b builds
+          git add -A
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -qm "Derleme ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" builds

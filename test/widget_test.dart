@@ -31,10 +31,26 @@ void main() {
     }))!;
   }
 
-  Future<void> settle(WidgetTester tester, [int ms = 400]) async {
-    await tester.runAsync(() => Future<void>.delayed(Duration(milliseconds: ms)));
+  /// Gerçek zamanlı bölgede kare üretir: isolate/veritabanı/zamanlayıcı işleri tamamlanabilsin.
+  Future<void> settle(WidgetTester tester, [int ms = 400, bool Function()? until]) async {
+    await tester.runAsync(() async {
+      final end = DateTime.now().add(Duration(milliseconds: until == null ? ms : 20000));
+      while (DateTime.now().isBefore(end)) {
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await tester.pump();
+        if (until != null && until()) break;
+      }
+    });
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+  }
+
+  /// Widget'ı gerçek zamanlı bölgede yerleştirir (async yüklemeler sahte saate takılmaz).
+  Future<void> pumpReal(WidgetTester tester, Widget w) => tester.runAsync(() => tester.pumpWidget(w));
+
+  /// Denetleyici işlemleri gerçek bölgede (zamanlayıcılar ve isolate'ler için).
+  Future<void> act(WidgetTester tester, void Function() action) async {
+    await tester.runAsync(() async => action());
+    await settle(tester, 250);
   }
 
   void setSize(WidgetTester tester, Size logical, {double dpr = 1}) {
@@ -47,8 +63,8 @@ void main() {
     testWidgets('ana ekran Türkçe ve taşmasız ($name)', (tester) async {
       setSize(tester, size, dpr: dpr);
       final s = await services(tester);
-      await tester.pumpWidget(PixelShiftApp(services: s));
-      await settle(tester);
+      await pumpReal(tester, PixelShiftApp(services: s));
+      await settle(tester, 0, () => find.textContaining('Henüz proje yok').evaluate().isNotEmpty);
       expect(find.text('PIXELSHIFT'), findsWidgets);
       for (final t in ['Şablonlar', 'Kolaj', 'Boş tuval', 'Toplu işlem', 'Projeler']) {
         expect(find.text(t), findsWidgets, reason: t);
@@ -62,36 +78,32 @@ void main() {
       final created = (await tester.runAsync(() => ProjectFactory(s).fromFile(
             PickedFile('deneme.png', ImageCodec.encode(syntheticImage(640, 400), ExportFormat.png)),
           )))!;
-      await tester.pumpWidget(Services(services: s, child: MaterialApp(home: EditorPage(projectId: created.info.id))));
-      for (var i = 0; i < 10 && UnsavedGuard.active == null; i++) {
-        await settle(tester, 300);
-      }
+      UnsavedGuard.active = null;
+      await pumpReal(tester, Services(services: s, child: MaterialApp(home: EditorPage(projectId: created.info.id))));
+      await settle(tester, 0, () => UnsavedGuard.active?.baseImage != null);
       final c = UnsavedGuard.active!;
-      await settle(tester, 600);
       expect(c.baseImage, isNotNull, reason: 'önizleme oluşmalı');
       expect(tester.takeException(), isNull);
 
-      c.addText(text: 'Merhaba Dünya');
-      await settle(tester);
+      await act(tester, () => c.addText(text: 'Merhaba Dünya'));
       expect(c.doc.layers.length, 1);
       expect(c.isDirty, isTrue);
-      c.undo();
-      await settle(tester);
+      await act(tester, c.undo);
       expect(c.doc.layers, isEmpty);
-      c.redo();
-      await settle(tester);
+      await act(tester, c.redo);
       expect(c.doc.layers.length, 1);
 
       for (final tool in [EditorTool.adjust, EditorTool.filters, EditorTool.crop, EditorTool.text, EditorTool.shapes, EditorTool.stickers, EditorTool.mask, EditorTool.ai]) {
-        c.setTool(tool);
-        await settle(tester, 200);
+        await act(tester, () => c.setTool(tool));
         expect(tester.takeException(), isNull, reason: tool.label);
       }
-      c.cancelCrop();
-      c.setTool(EditorTool.select);
+      await act(tester, () {
+        c.cancelCrop();
+        c.setTool(EditorTool.select);
+      });
       await tester.runAsync(c.save);
       expect(c.isDirty, isFalse);
-      await tester.pumpWidget(const SizedBox());
+      await pumpReal(tester, const SizedBox());
       await settle(tester);
     });
   }

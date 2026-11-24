@@ -125,7 +125,7 @@ Future<void> runScreenshotMode(String outDir) async {
         );
 
     // ----------------------------------------------------- Masaüstü (1440x900)
-    runApp(frame(const Size(1440, 900), 0, PixelShiftApp(services: services, navigatorKey: navigatorKey)));
+    runApp(frame(const Size(1440, 900), 0, PixelShiftApp(key: const ValueKey('masaustu'), services: services, navigatorKey: navigatorKey)));
     await _frames(40);
     await shot('01_ana_ekran');
 
@@ -150,7 +150,7 @@ Future<void> runScreenshotMode(String outDir) async {
 
     // ----------------------------------------------------- Telefon (390x844)
     final phoneKey = GlobalKey<NavigatorState>();
-    runApp(frame(const Size(390, 844), 24, PixelShiftApp(services: services, navigatorKey: phoneKey)));
+    runApp(frame(const Size(390, 844), 24, PixelShiftApp(key: const ValueKey('telefon'), services: services, navigatorKey: phoneKey)));
     await _frames(40);
     await shot('07_telefon_ana_ekran');
     UnsavedGuard.active = null;

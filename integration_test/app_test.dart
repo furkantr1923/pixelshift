@@ -20,7 +20,7 @@ import 'package:pixelshift/layers/layer.dart';
 import 'package:pixelshift/platform_services/app_paths.dart';
 import 'package:pixelshift/platform_services/file_service.dart';
 import 'package:pixelshift/projects/project_factory.dart';
-import 'package:pixelshift/self_test.dart' show syntheticImage, meanAbsDiff;
+import 'package:pixelshift/self_test.dart' show syntheticImage;
 
 /// Gerçek cihazda / emülatörde / Windows'ta uçtan uca test.
 ///
@@ -101,7 +101,9 @@ void main() {
     final c2 = UnsavedGuard.active!;
     expect(c2.doc.layers.length, 2);
     expect(c2.history.length, savedHistory);
-    expect(c2.doc.adjustments, isNot(Adjustments.none));
+    // Yerel AI sonucu ayarları yeni kaynağa "pişirir"; ayarlar sıfırlanır, kaynak sürümü korunur.
+    expect(c2.doc.sourceFile, startsWith('source_'));
+    expect(c2.doc.adjustments, Adjustments.none);
 
     // 8) Dışa aktarma: JPG / PNG (şeffaflık) / WEBP
     for (final f in [ExportFormat.jpg, ExportFormat.png, ExportFormat.webp]) {
@@ -119,7 +121,6 @@ void main() {
     c2.jumpTo(0);
     await waitUntil(tester, () => !c2.rendering);
     expect(c2.doc.sourceFile, 'source.png');
-    expect(meanAbsDiff(source, source), 0);
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpAndSettle();
