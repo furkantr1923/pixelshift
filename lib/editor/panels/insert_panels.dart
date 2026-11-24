@@ -183,7 +183,7 @@ class MaskPanel extends StatelessWidget {
                 children: [
                   Expanded(
                     child: PxChip(
-                      label: 'Fırça (gizle)',
+                      label: 'Fırça · gizle',
                       icon: Icons.brush,
                       selected: controller.maskHide,
                       onTap: () => controller.setMaskSettings(hide: true),
@@ -192,7 +192,7 @@ class MaskPanel extends StatelessWidget {
                   const SizedBox(width: 6),
                   Expanded(
                     child: PxChip(
-                      label: 'Silgi (göster)',
+                      label: 'Silgi · göster',
                       icon: Icons.auto_fix_normal,
                       selected: !controller.maskHide,
                       onTap: () => controller.setMaskSettings(hide: false),

@@ -379,7 +379,7 @@ class PxChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[Icon(icon, size: 15), const SizedBox(width: 5)],
-              Text(label, style: const TextStyle(fontSize: 12.5)),
+              Flexible(child: Text(label, style: const TextStyle(fontSize: 12.5), overflow: TextOverflow.ellipsis, maxLines: 1)),
             ],
           ),
         ),
